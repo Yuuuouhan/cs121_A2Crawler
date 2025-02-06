@@ -1,5 +1,7 @@
 import re
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+import time
 
 threshold = 10 # threshold for repeated urls
 
@@ -39,7 +41,7 @@ def passed_threshold(url):
     return parsed_urls[url] == threshold
 
 def scraper(url, resp):
-    links = extract_next_links(url, resp)
+    links = extract_next_links(url, resp)  #links is a list
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
