@@ -20,6 +20,15 @@ def already_parsed(url):
         #contents = file.read()
         #return url in contents
 
+def remove_fragment(url):
+    """
+    Removes the fragment of an URL. If URL has no fragment, return the original URL.
+
+    @param: url that is to be defragmented.
+    @returnL returns the URL without fragment.
+    """
+    return urlparse.urldefrag(url)[0]
+
 def passed_threshold(url):
     """
     Checks whether we have accessed this page (or a similar page) beyond the thresold
