@@ -1,6 +1,34 @@
 import re
 from urllib.parse import urlparse
 
+threshold = 10 # threshold for repeated urls
+
+# use if we want a dictionary approach
+parsed_urls = {} 
+
+def already_parsed(url):
+    """
+    Checks whether we have already parsed this url or not.
+
+    @param url: url that is about to be parsed.
+    @return: Returns True if url is in the dictionary
+    """
+    return url in parsed_urls
+    
+    ### use this code if we want a .txt approach ###
+    # with open("parsed_urls.txt") as file:
+        #contents = file.read()
+        #return url in contents
+
+def passed_threshold(url):
+    """
+    Checks whether we have accessed this page (or a similar page) beyond the thresold
+
+    @param url: url that is about to be parsed.
+    @return: Returns True if we've passed the threshold of parsing this specific url.
+    """
+    return parsed_urls[url] == threshold
+
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -15,6 +43,15 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+
+    # Thought process?:
+    # need try/except statements for status codes (resp.status)
+    # add resp.url to parse_urls if not already there, else, update the num of times we've parsed this
+    # if a page is a duplicate/near duplicate, update the num of times we've parsed the similar url
+    # scrape the urls in that page, return list
+    # except if status code is 300: do not go to redirected page?
+    # except if status code is 400: continue
+
     return list()
 
 def is_valid(url):
@@ -27,8 +64,11 @@ def is_valid(url):
             return False
             
         valid_hostname_pattern = r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
-        return re.match(valid_hostname_pattern, parsed.hostname)
+
+        if not re.match(valid_hostname_pattern, parsed.hostname) or already_parsed(url) or passed_threshold(url):
+            return False
         
+        # claiming this code is unreachable
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
