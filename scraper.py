@@ -44,6 +44,15 @@ def scraper(url, resp):
     links = extract_next_links(url, resp)  #links is a list
     return [link for link in links if is_valid(link)]
 
+def get_redirect(url, resp):
+    """
+    Find redircted link(s).
+    @param: url, response
+    @return: list of link(s) redirected to
+    """
+    status = str(resp.status)
+    return list()
+
 def extract_next_links(url, resp):
     # Implementation required.
     # url: the URL that was used to get the page
@@ -62,6 +71,14 @@ def extract_next_links(url, resp):
     # scrape the urls in that page, return list
     # except if status code is 300: do not go to redirected page?
     # except if status code is 400: continue
+
+    # status code checking
+    # 4xx client side error -> no links scrapped
+    if str(resp.status).startswith("4"):
+        return None
+    # 3xx redirect: check redirect url, parse redirect url
+    else if str(resp.status).startswith("3"):
+        return get_redirect(url, resp)
 
     return list()
 
