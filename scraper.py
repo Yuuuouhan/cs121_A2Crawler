@@ -78,7 +78,7 @@ def extract_next_links(url, resp):
     if str(resp.status).startswith("4"):
         return None
     # 3xx redirect: check redirect url, parse redirect url
-    else if str(resp.status).startswith("3"):
+    elif str(resp.status).startswith("3"):
         return get_redirect(url, resp)
 
     content = resp.content
@@ -89,6 +89,7 @@ def extract_next_links(url, resp):
     else:
         parsed_urls[url] += 1
 
+    extracted_links = []
     for link in soup.find_all('a'):
             href = link.get('href')
             if href:
