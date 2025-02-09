@@ -50,9 +50,26 @@ def get_redirect(url, resp):
     Find redircted link(s).
     @param: url, response
     @return: list of link(s) redirected to
+    Notes:
+    304 - not modified: returned when request sent with 
+        conditional "Has website updated sice xyz?" and answer is no
+    305 - use proxy: decapricated due to security concerns
+    306 - not used
+    PROBLEM: how do I access HTTP headers???
     """
-    status = str(resp.status)
+    # integer
+    status = resp.status
+    # multiple choices 
+    if status == 300:
+        # implementation specific: can check HTTP header Alternative or html
+        pass
+    # moved perm, moved temp (AKA found), see other (primarily from POST), temp redirect, perm redirect
+    elif status in (301, 302, 303, 308, 309):
+        # Location header in HTTP for redirection link
+        pass
+    
     return list()
+
 
 def extract_next_links(url, resp):
     # Implementation required.
