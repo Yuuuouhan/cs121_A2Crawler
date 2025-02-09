@@ -1,7 +1,6 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import requests
 import time
 from urllib.parse import urljoin
 
