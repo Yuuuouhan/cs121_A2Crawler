@@ -2,6 +2,7 @@ import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import time
+from urllib.parse import urljoin
 
 threshold = 10 # threshold for repeated urls
 
@@ -80,7 +81,25 @@ def extract_next_links(url, resp):
     else if str(resp.status).startswith("3"):
         return get_redirect(url, resp)
 
-    return list()
+    content = resp.content
+    soup = BeautifulSoup(content, 'html5lib')
+
+    if url not in parsed_urls:
+        parsed_urls[url] = 1
+    else:
+        parsed_urls[url] += 1
+
+    for link in soup.find_all('a'):
+            href = link.get('href')
+            if href:
+                if not bool(urlparse(href).netloc):
+                    base_url = resp.url
+                    href = urljoin(base_url, href)
+                href = remove_fragment(href)
+                if href not in extracted_links:
+                    extracted_links.append(href)
+
+    return extracted_links
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
