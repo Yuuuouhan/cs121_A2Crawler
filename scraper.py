@@ -2,7 +2,7 @@ import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import time
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urldefrag
 
 threshold = 10 # threshold for repeated urls
 
@@ -30,7 +30,7 @@ def remove_fragment(url):
     @param: url that is to be defragmented.
     @returnL returns the URL without fragment.
     """
-    return urlparse.urldefrag(url)[0]
+    return urldefrag(url)[0]
 
 def passed_threshold(url):
     """
@@ -39,11 +39,12 @@ def passed_threshold(url):
     @param url: url that is about to be parsed.
     @return: Returns True if we've passed the threshold of parsing this specific url.
     """
-    return parsed_urls[url] == threshold
+    return (url in parsed_urls) and (parsed_urls[url] == threshold)
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)  #links is a list
     return [link for link in links if is_valid(link)]
+     
 
 def get_redirect(url, resp):
     """
@@ -57,6 +58,9 @@ def get_redirect(url, resp):
     306 - not used
     PROBLEM: how do I access HTTP headers???
     """
+    print("WE HAVE A CODE 3XX!!!")
+    print(resp.error)
+
     # integer
     status = resp.status
     # multiple choices 
@@ -92,13 +96,13 @@ def extract_next_links(url, resp):
 
     # status code checking
     # 4xx client side error -> no links scrapped
-    if str(resp.status).startswith("4"):
-        return None
+    if (resp.status // 100 == 4) or (resp.status // 100 == 6):
+        return list()
     # 3xx redirect: check redirect url, parse redirect url
-    elif str(resp.status).startswith("3"):
+    elif resp.status // 100 == 3:
         return get_redirect(url, resp)
 
-    content = resp.content
+    content = resp.raw_response.content
     soup = BeautifulSoup(content, 'html5lib')
 
     if url not in parsed_urls:
@@ -116,7 +120,6 @@ def extract_next_links(url, resp):
                 href = remove_fragment(href)
                 if href not in extracted_links:
                     extracted_links.append(href)
-
     return extracted_links
 
 def is_valid(url):
@@ -127,10 +130,19 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-            
+        # original: r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
         valid_hostname_pattern = r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
 
-        if not re.match(valid_hostname_pattern, parsed.hostname) or already_parsed(url) or passed_threshold(url):
+        if not re.match(valid_hostname_pattern, parsed.hostname.strip()):
+            print(f"BAD LINK (domain): {parsed.hostname}")
+            return False
+        
+        if already_parsed(url):
+            print(f"BAD LINK (discovered): {url}")
+            return False
+        
+        if passed_threshold(url):
+            print(f"BAD LINK (threshold): {url}")
             return False
         
         # claiming this code is unreachable
