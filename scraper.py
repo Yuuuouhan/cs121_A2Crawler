@@ -112,11 +112,13 @@ def extract_next_links(url, resp):
     #extraction of links from 'url'
     extracted_links = []
     extracted_links = extract_links(soup, url)
-    #what do we do with these links?
+    if extracted_links != []:
+        pass                   #what do we do with these links?
 
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
     scraped_content[url] = extract_text_content(soup)
+    #not sure how to go about tokenizing after this step
 
 
 def is_valid(url):
@@ -128,7 +130,7 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
         # original: r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
-        valid_hostname_pattern = r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
+        valid_hostname_pattern = r'.*(ics|cs|informatics|stat)\.uci\.edu$'
 
         if not re.match(valid_hostname_pattern, parsed.hostname.strip()):
             print(f"BAD LINK (domain): {parsed.hostname}")

@@ -1,13 +1,14 @@
 #file to store all functionality done by beautifulsoup
 
 from bs4 import BeautifulSoup
-import re
 from urllib.parse import urlparse
 from urllib.parse import urljoin, urldefrag
 import time
 from scraper import parsed_urls
+from scraper import extract_next_links
 
 def extraction(url, resp):
+    time.sleep(0.5)  # Politeness delay of 0.5 seconds
     content = resp.content #would like to see what this looks like maybe?
     try:
         soup = BeautifulSoup(content, 'html5lib')
@@ -27,12 +28,29 @@ def extraction(url, resp):
 
 def extract_links(soup, base_url):
     extracted_links = []
+    canonical_link = None
+
+    # Check for canonical link
+    canonical_tag = soup.find('link', rel='canonical')
+    if canonical_tag and canonical_tag.get('href'):
+        canonical_link = canonical_tag.get('href')
+        if not bool(urlparse(canonical_link).netloc):  # Check if the href is a relative URL
+            canonical_link = urljoin(base_url, canonical_link)
+        canonical_link, _ = urldefrag(canonical_link)
+    
+    if canonical_link:
+        extract_next_links(canonical_link)
+        return
+
     for link in soup.find_all('a', href=True):
         href = link.get('href')
         if href:
-            if not bool(urlparse(href).netloc): # Check if the href is a relative URL
+            if not bool(urlparse(href).netloc):  # Check if the href is a relative URL
                 href = urljoin(base_url, href)
             href, _ = urldefrag(href)
+            # Check for nofollow or noindex
+            if 'nofollow' in link.get('rel', []) or 'noindex' in link.get('rel', []):
+                continue
             if href not in extracted_links:
                 extracted_links.append(href)
     return extracted_links
