@@ -110,6 +110,7 @@ def extract_next_links(url, resp):
     else:
         parsed_urls[url] += 1
 
+    #only extracting link as of now
     extracted_links = []
     for link in soup.find_all('a'):
             href = link.get('href')
