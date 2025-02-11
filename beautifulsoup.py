@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 from urllib.parse import urljoin, urldefrag
 import time
 from scraper import parsed_urls
-from scraper import extract_next_links
 
 def extraction(url, resp):
     time.sleep(0.5)  # Politeness delay of 0.5 seconds
@@ -39,8 +38,7 @@ def extract_links(soup, base_url):
         canonical_link, _ = urldefrag(canonical_link)
     
     if canonical_link:
-        extract_next_links(canonical_link)
-        return
+        return [canonical_link]
 
     for link in soup.find_all('a', href=True):
         href = link.get('href')
@@ -57,6 +55,6 @@ def extract_links(soup, base_url):
 
 def extract_text_content(soup):
     text_content = []
-    for a_tag in soup.find_all('a'):
+    for a_tag in soup.find_all('a'): #change this
         text_content.append(a_tag.get_text())
     return text_content

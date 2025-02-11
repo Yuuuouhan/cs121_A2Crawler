@@ -218,3 +218,13 @@ THINGS TO KEEP IN MIND
    both. Mechanisms can be used to avoid that, however the politeness limits
    still apply and will be checked.
 6. Do not attempt to download the links directly from ics servers.
+
+FILES AND WHAT THEY DO
+
+launch.py - where the program starts
+scraper.py - main functions
+answers.py - computes answers for final_answers.txt
+tokenizer.py - tokenizers from A1
+
+final_answers.txt - stores final answers
+stop_words.txt - contains stop words
