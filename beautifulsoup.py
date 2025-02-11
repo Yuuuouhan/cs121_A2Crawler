@@ -5,6 +5,7 @@ import re
 from urllib.parse import urlparse
 from urllib.parse import urljoin, urldefrag
 import time
+from scraper import parsed_urls
 
 def extraction(url, resp):
     content = resp.content #would like to see what this looks like maybe?

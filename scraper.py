@@ -1,5 +1,5 @@
 import re
-import beautifulsoup #our file
+from beautifulsoup import extraction, extract_links, extract_text_content
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import time
@@ -116,7 +116,7 @@ def extract_next_links(url, resp):
 
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
-    scraped_content[url] = extract_text_content(soup, url)
+    scraped_content[url] = extract_text_content(soup)
 
 
 def is_valid(url):
