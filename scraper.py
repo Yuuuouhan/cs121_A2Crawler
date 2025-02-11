@@ -1,4 +1,5 @@
 import re
+import beautifulsoup #our file
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import time
@@ -8,6 +9,9 @@ threshold = 10 # threshold for repeated urls
 
 # use if we want a dictionary approach
 parsed_urls = {} 
+
+#key - url, value - content scraped from page
+scraped_content = {} 
 
 def already_parsed(url):
     """
@@ -102,26 +106,18 @@ def extract_next_links(url, resp):
     elif resp.status // 100 == 3:
         return get_redirect(url, resp)
 
-    content = resp.raw_response.content
-    soup = BeautifulSoup(content, 'html5lib')
+    #beautiful soup takes over from here and returns html content
+    soup = extraction(url, resp)
 
-    if url not in parsed_urls:
-        parsed_urls[url] = 1
-    else:
-        parsed_urls[url] += 1
-
-    #only extracting link as of now
+    #extraction of links from 'url'
     extracted_links = []
-    for link in soup.find_all('a'):
-            href = link.get('href')
-            if href:
-                if not bool(urlparse(href).netloc):
-                    base_url = resp.url
-                    href = urljoin(base_url, href)
-                href = remove_fragment(href)
-                if href not in extracted_links:
-                    extracted_links.append(href)
-    return extracted_links
+    extracted_links = extract_links(soup, url)
+    #what do we do with these links?
+
+    #extraction of text content from 'url'
+    #note - UNIQUE URL CHECKING ISSUE
+    scraped_content[url] = extract_text_content(soup, url)
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
