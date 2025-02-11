@@ -109,6 +109,9 @@ def extract_next_links(url, resp):
     #beautiful soup takes over from here and returns html content
     soup = extraction(url, resp)
 
+    #this part can lowk go in the beautifulsoup.py file so the 'soup'is not being transferred between files
+    #then maybe just return extracted_links, scraped_content directly when calling extraction() function
+
     #extraction of links from 'url'
     extracted_links = []
     extracted_links = extract_links(soup, url)
@@ -130,8 +133,9 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
+        
         # original: r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
-        valid_hostname_pattern = r'.*(ics|cs|informatics|stat)\.uci\.edu$'
+        valid_hostname_pattern = r'.*(ics|cs|informatics|stat)\.uci\.edu$' #this one seems to work. needs to be tested with class server
 
         if not re.match(valid_hostname_pattern, parsed.hostname.strip()):
             print(f"BAD LINK (domain): {parsed.hostname}")
