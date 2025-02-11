@@ -119,6 +119,7 @@ def extract_next_links(url, resp):
     #note - UNIQUE URL CHECKING ISSUE
     scraped_content[url] = extract_text_content(soup)
     #not sure how to go about tokenizing after this step
+    #can also do tokeizing in extract_text_content function
 
 
 def is_valid(url):
