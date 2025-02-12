@@ -3,6 +3,8 @@ import re
 
 # have a file of stop words
 
+tokens = []
+
 def tokenize(content: str) -> list:
     """
 	Takes a string of content, returns a list of viable tokens in the string.
@@ -29,7 +31,7 @@ def tokenize(content: str) -> list:
             if word.isnumeric():
                 word = int(word)
             tokens_list.append(word)
-        return tokens_list
+        tokens.extend(tokens_list)
     except FileNotFoundError:
         raise FileNotFoundError("File Not Found.")
     except UnicodeDecodeError:
@@ -40,16 +42,18 @@ def tokenize(content: str) -> list:
         raise Exception(f"An unexpected error occurred: {e}")
 
 def computeWordFrequencies(list_token: list) -> dict:
-    list_token_copy = list_token[:]
+    list_token_copy = tokens[:]
     token_map = {}
     for word in list_token_copy:
         if word not in list(token_map.keys()):
             token_map[word] = list_token.count(word)
             list_token_copy = [x for x in list_token_copy if x != word]
     token_map_copy = token_map.copy()
+    del token_map[""] # should remove spaces that come up as tokens
     with open("stop_words.txt") as file:
         contents = file.readlines()
         for keyword in contents:
             if keyword in token_map_copy:
                 del token_map[keyword]
-    return token_map
+    token_map = {k: v for k, v in sorted(token_map.items(), key=lambda x: x[1])}
+    return token_map[:50]

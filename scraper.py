@@ -2,6 +2,9 @@ import re
 from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize
+import robots as r
+
+robot_checker = r.Robot_Reader()
 
 threshold = 10 # threshold for repeated urls
 
@@ -134,6 +137,10 @@ def is_valid(url):
             return False
         
         if passed_threshold(url):
+            print(f"BAD LINK (threshold): {url}")
+            return False
+
+        if not robot_checker.check(url):
             print(f"BAD LINK (threshold): {url}")
             return False
         
