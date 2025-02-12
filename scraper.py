@@ -1,8 +1,7 @@
 import re
 from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
-import time
-from urllib.parse import urljoin, urldefrag
+from tokenizer import tokenize
 
 threshold = 10 # threshold for repeated urls
 
@@ -25,15 +24,6 @@ def already_parsed(url):
     # with open("parsed_urls.txt") as file:
         #contents = file.read()
         #return url in contents
-
-def remove_fragment(url):
-    """
-    Removes the fragment of an URL. If URL has no fragment, return the original URL.
-
-    @param: url that is to be defragmented.
-    @returnL returns the URL without fragment.
-    """
-    return urldefrag(url)[0]
 
 def passed_threshold(url):
     """
@@ -163,8 +153,8 @@ def is_valid(url):
         raise
 
 def extraction(url, resp):
-    time.sleep(0.5)  # Politeness delay of 0.5 seconds
-    content = resp.content #would like to see what this looks like maybe?
+    #time.sleep(0.5)  # Politeness delay of 0.5 seconds
+    content = resp.raw_response.content #would like to see what this looks like maybe?
     try:
         soup = BeautifulSoup(content, 'html5lib')
     except Exception:
@@ -194,12 +184,12 @@ def extract_links(soup, base_url):
         canonical_link, _ = urldefrag(canonical_link)
     
     if canonical_link:
-        return [canonical_link]
+        return [canonical_link] #add if statement if canonical is equal to the link
 
     for link in soup.find_all('a', href=True):
         href = link.get('href')
         if href:
-            if not bool(urlparse(href).netloc):  # Check if the href is a relative URL
+            if not bool(urlparse(href).netloc): 
                 href = urljoin(base_url, href)
             href, _ = urldefrag(href)
             # Check for nofollow or noindex
@@ -211,7 +201,12 @@ def extract_links(soup, base_url):
 
 def extract_text_content(soup):
     text_content = []
-    for a_tag in soup.find_all('a'): #change this
-        text_content.append(a_tag.get_text())
-    print(text_content)
-    return text_content
+    for element in soup.find_all(string=True):
+        if element.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+            text = element.strip()
+            if text:
+                text_content.append(text)
+    tokens = []
+    for text in text_content:
+        tokens.extend(tokenize(text))
+    return tokens                        #list of token for simhash
