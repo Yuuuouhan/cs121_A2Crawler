@@ -1,4 +1,4 @@
-import contractions
+# import contractions
 import re
 
 # have a file of stop words

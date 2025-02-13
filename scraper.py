@@ -2,9 +2,9 @@ import re
 from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize
-import robots as r
+# import robots as r
 
-robot_checker = r.Robot_Reader()
+# robot_checker = r.Robot_Reader()
 
 threshold = 10 # threshold for repeated urls
 
@@ -39,7 +39,9 @@ def passed_threshold(url):
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)  #links is a list
-    return [link for link in links if is_valid(link)]
+    valid_links = [link for link in links if is_valid(link)]
+    print(f"Adding to frontier: {valid_links}")
+    return valid_links
      
 
 def get_redirect(url, resp):
@@ -140,9 +142,9 @@ def is_valid(url):
             print(f"BAD LINK (threshold): {url}")
             return False
 
-        if not robot_checker.check(url):
-            print(f"BAD LINK (threshold): {url}")
-            return False
+        # if not robot_checker.check(url):
+        #    print(f"BAD LINK (threshold): {url}")
+        #    return False
         
         # claiming this code is unreachable
         return not re.match(
@@ -190,7 +192,8 @@ def extract_links(soup, base_url):
             canonical_link = urljoin(base_url, canonical_link)
         canonical_link, _ = urldefrag(canonical_link)
     
-    if canonical_link:
+    if canonical_link and same_url(canonical_link, base_url):
+        print(f"Returning canonical link only: {canonical_link}")
         return [canonical_link] #add if statement if canonical is equal to the link
 
     for link in soup.find_all('a', href=True):
@@ -217,3 +220,20 @@ def extract_text_content(soup):
     for text in text_content:
         tokens.extend(tokenize(text))
     return tokens                        #list of token for simhash
+
+
+def same_url(url1:str, url2:str):
+    """
+    Check if two URLs are essentially the same.
+    @params: URL1 and URL2 for comparison
+    @return: True if URL1 = URL2 else False
+    """
+    parsed1 = urlparse(url1)
+    if parsed1.path == '/':
+        parsed1 = parsed1._replace(path='')
+    parsed2 = urlparse(url2)
+    if parsed2.path == '/':
+        parsed2 = parsed2._replace(path='')
+
+    return (parsed1.scheme == parsed2.scheme and parsed1.netloc == parsed2.netloc
+            and parsed1.path == parsed2.path and parsed1.query == parsed2.query)

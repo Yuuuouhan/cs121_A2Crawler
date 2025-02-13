@@ -1,5 +1,8 @@
 import hashlib
 
+# hard code things to avoid
+# unique pages and filtered
+
 def get_frequencies(tokens:list):
     """
     Get the frequencies of each tokens to use as weights.
