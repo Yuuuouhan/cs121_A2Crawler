@@ -209,4 +209,4 @@ def extract_text_content(soup):
     tokens = []
     for text in text_content:
         tokens.extend(tokenize(text))
-    return tokens                        #list of token for simhash
+    return tokens                        #list of token for simhas
