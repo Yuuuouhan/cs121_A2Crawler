@@ -1,39 +1,34 @@
-# import contractions
 import re
 
-# have a file of stop words
+# account for contractions, non-enlish tokens, single-letter tokens
 
-tokens = []
+tokens_dict = {}
 
-def tokenize(text):
+def tokenize(text: str) -> None:
     """
-    Tokenizes the given text string.
-    Parameters:
-    text (str): The text string to be tokenized.
-    Returns:
-    list: A list of tokens (words) extracted from the text string.
-    Time Complexity: O(n), where n is the number of characters in the text string.
+    Tokenizes the given text string, and updates all tokens in tokens_dict.
+
+    @param text: a string that needs to be tokenized.
+    @return: None
     """
-    pattern = r'\b\w+\b'
+    pattern = r'\W+'
     lowercase_text = text.lower()
     words = re.findall(pattern, lowercase_text)
-    tokens.extend(words)
-    return tokens
-
-def compute_word_frequencies(tokens):
-    """
-    Computes the frequency of each word in the list of tokens.
-    Parameters:
-    tokens (list): A list of tokens (words).
-    Returns:
-    defaultdict: A dictionary with words as keys and their frequencies as values.
-    Time Complexity: O(n), where n is the number of tokens.
-    """
-    word_frequencies = {}
-    for token in tokens:
-        if token in word_frequencies:
-            word_frequencies[token] += 1
+    for word in words:
+        if word in tokens_dict:
+            tokens_dict[word] += 1
         else:
-            word_frequencies[token] = 1  
-    return word_frequencies
+            tokens_dict[word] == 1
 
+def compute_word_frequencies() -> dict:
+    """
+    Returns the 50 most common tokens in tokens_dict based on frequency.
+
+    @return: dictionary of the 50 most common words and their frequencies, in order.
+    """
+    return dict(sorted(tokens_dict.items(), key=lambda x: x[1]))
+
+if __name__ == "__main__":
+    sample_string = "is This this is a sample tesTing string. It contains some test words. It's a test. ಹಲೋ, ಹೇಗಿದ್ದೀಯನ್ನು ಕಾರ್ಯಕ"
+    tokenize(sample_string)
+    print(compute_word_frequencies())
