@@ -2,7 +2,6 @@ from urllib.parse import urlparse, urldefrag
 import re
 import tokenizer
 
-
 pages = set()
 subdomains = dict()
 max_URL = ""
@@ -11,7 +10,7 @@ max_words = ""
 def answers():
 	num_unique_URLS = unique_URLS()
 	longest_page = longest_page()
-	common_words = tokenizer.computeWordFrequencies()
+	common_words = tokenizer.computeWordFrequencies(tokenizer.tokens)
 	subdomains = find_subdomains()
 	
 	with open("final_answers.txt", "w") as file:
@@ -38,7 +37,7 @@ def add_to_ics_domains(url: str) -> None:
 	@param url: incoming absolute URL path
 	@return: None
 	"""
-	domain = urlparse(url).netloc
+	domain = urlparse(url).netloc[-11:]
 	url = urldefrag(url)
 	if domain == "ics.uci.edu":
 		parsed_url = urlparse(url).hostname
