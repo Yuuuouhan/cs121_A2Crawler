@@ -238,8 +238,24 @@ def extract_text_content(soup):
         if element.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]']:
             text = element.strip()
             if text:
-                text_content.append(text)
-    tokens = []
-    for text in text_content:
-        tokens.extend(tokenize(text))
-    return tokens                        #list of token for simhash
+                tokens.extend(tokenize(text))
+    if debug:
+        print(f"Tokens: {tokens}")
+    return tokens                        
+
+
+def same_url(url1:str, url2:str):
+    """
+    Check if two URLs are essentially the same.
+    @params: URL1 and URL2 for comparison
+    @return: True if URL1 = URL2 else False
+    """
+    parsed1 = urlparse(url1)
+    if parsed1.path == '/':
+        parsed1 = parsed1._replace(path='')
+    parsed2 = urlparse(url2)
+    if parsed2.path == '/':
+        parsed2 = parsed2._replace(path='')
+
+    return (parsed1.scheme == parsed2.scheme and parsed1.netloc == parsed2.netloc
+            and parsed1.path == parsed2.path and parsed1.query == parsed2.query)
