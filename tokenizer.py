@@ -31,7 +31,7 @@ def tokenize(content: str) -> list:
             if word.isnumeric():
                 word = int(word)
             tokens_list.append(word)
-        tokens.extend(tokens_list)
+        # tokens.extend(tokens_list) # COMMENTED OUT FOR MEMORY!!!
     except FileNotFoundError:
         raise FileNotFoundError("File Not Found.")
     except UnicodeDecodeError:
@@ -40,6 +40,7 @@ def tokenize(content: str) -> list:
         raise PermissionError("Permission denied.")
     except Exception as e:
         raise Exception(f"An unexpected error occurred: {e}")
+    return tokens_list
 
 def computeWordFrequencies(list_token: list) -> dict:
     list_token_copy = tokens[:]
