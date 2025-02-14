@@ -224,7 +224,7 @@ def is_valid(url):
 def extraction(url, resp):
     #time.sleep(0.5)  # Politeness delay of 0.5 seconds
     content = resp.raw_response.content #would like to see what this looks like maybe?
-    print content
+    print(content)
     try:
         soup = BeautifulSoup(content, 'html5lib')
     except Exception:
