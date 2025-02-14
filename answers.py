@@ -9,8 +9,8 @@ max_words = ""
 
 def answers():
 	num_unique_URLS = unique_URLS()
-	longest_page = longest_page()
-	common_words = tokenizer.computeWordFrequencies(tokenizer.tokens)
+	longest_page = return_longest_page()
+	common_words = tokenizer.computeWordFrequencies()
 	subdomains = find_subdomains()
 	
 	with open("final_answers.txt", "w") as file:
@@ -70,7 +70,7 @@ def update_max_URL(url: str, response: str) -> None:
 			max_URL = url
 			max_words = new_length
 
-def longest_page() -> int:
+def return_longest_page() -> int:
 	"""
 	Returns the longest page in terms of the number of words, excluding HTML markup.
 	

@@ -20,6 +20,7 @@ def tokenize(text: str) -> None:
                 tokens_dict[word] += 1
             elif word != ' ' and word != '':
                 tokens_dict[word] = 1
+        return words
     except KeyError:
         pass
 
