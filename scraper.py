@@ -105,6 +105,7 @@ def extract_next_links(url, resp):
     elif resp.status // 100 == 3:
         return get_redirect(url, resp)
 
+    
     #beautiful soup takes over from here and returns html content
     soup = extraction(url, resp)
 
@@ -118,7 +119,6 @@ def extract_next_links(url, resp):
     extracted_links = []
     extracted_links = extract_links(soup, url)
     
-
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
     content = extract_text_content(soup)
