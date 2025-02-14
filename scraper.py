@@ -1,7 +1,8 @@
 import re
 from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
-from tokenizer import tokenize
+from tokenizer import tokenize, compute_word_frequencies
+import duplication
 # import robots as r
 
 
@@ -17,6 +18,11 @@ parsed_urls = {}
 
 #key - url, value - content scraped from page
 scraped_content = {} 
+
+# exact duplication checking: checksum
+checksums = set()
+# near duplication checking: simhash
+simhashes = set()
 
 def already_parsed(url):
     """
@@ -127,6 +133,27 @@ def extract_next_links(url, resp):
         scraped_content[url] = content
     else:
         print(f"Low info web ({len(content)} tokens): {url}")
+    
+    # duplication checking: check sum
+    checksum_val = duplication.checksum(content)
+    # exact duplicate found
+    if checksum_val in checksums:
+        return list()
+    else:
+        checksums.add(checksum_val)
+    simhash_val = duplication.simhash(compute_word_frequencies(content))
+    # check if any previous simhash and current simhash are too similar
+    near_dup = False
+    for sim in simhashes:
+        # threshold for near duplication is 0.75
+        if duplication.similarity_score(sim, simhash_val) >= 0.75:
+            near_dup = True
+            break
+    if near_dup:
+        return list()
+    else:
+        simhashes.add(simhash_val)
+
     #not sure how to go about tokenizing after this step
     #can also do tokeizing in extract_text_content function
     return extracted_links
