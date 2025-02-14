@@ -117,9 +117,12 @@ def extract_next_links(url, resp):
 
     #this part can lowk go in the beautifulsoup.py file so the 'soup'is not being transferred between files
     #then maybe just return extracted_links, scraped_content directly when calling extraction() function
+
+    # Do not scrape web content over 200KB
     content_size = len(resp.raw_response.content)
     if content_size > 200000:
         print(f"Content over 200,000 bytes (200KB): {content_size}")
+        return list()
 
     #extraction of links from 'url'
     extracted_links = []
@@ -128,12 +131,7 @@ def extract_next_links(url, resp):
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
     content = extract_text_content(soup)
-    # save content of webpage only if over 300 words (1 page) 
-    if len(content) > 300:
-        scraped_content[url] = content
-    else:
-        print(f"Low info web ({len(content)} tokens): {url}")
-    
+
     # duplication checking: check sum
     checksum_val = duplication.checksum(content)
     # exact duplicate found
@@ -153,6 +151,12 @@ def extract_next_links(url, resp):
         return list()
     else:
         simhashes.add(simhash_val)
+
+    # save content of webpage only if over 300 words (1 page) 
+    if len(content) > 300:
+        scraped_content[url] = content
+    else:
+        print(f"Low info web ({len(content)} tokens): {url}")
 
     #not sure how to go about tokenizing after this step
     #can also do tokeizing in extract_text_content function
