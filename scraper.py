@@ -3,6 +3,7 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize, compute_word_frequencies
 import duplication
+from answers import pages 
 # import robots as r
 
 
@@ -11,10 +12,8 @@ debug = False
 
 # robot_checker = r.Robot_Reader()
 
-threshold = 10 # threshold for repeated urls
-
 # use if we want a dictionary approach
-parsed_urls = {} 
+#parsed_urls = set()
 
 #key - url, value - content scraped from page
 scraped_content = {} 
@@ -31,21 +30,34 @@ def already_parsed(url):
     @param url: url that is about to be parsed.
     @return: Returns True if url is in the dictionary
     """
-    return url in parsed_urls
+    return url in pages
     
     ### use this code if we want a .txt approach ###
     # with open("parsed_urls.txt") as file:
         #contents = file.read()
         #return url in contents
 
-def passed_threshold(url):
+def crawler_trap(url):
     """
-    Checks whether we have accessed this page (or a similar page) beyond the thresold
+    Detects if a URL is a crawler trap.
+    
+    @param url: URL to be checked.
+    @return: Returns True if the URL is a crawler trap, otherwise False.
+    """
 
-    @param url: url that is about to be parsed.
-    @return: Returns True if we've passed the threshold of parsing this specific url.
-    """
-    return (url in parsed_urls) and (parsed_urls[url] == threshold)
+    #only check query
+
+    calendar_patterns = [
+        r'calendar', r'ical', r'icalendar', r'event', r'date', r'month', r'year', r'day'
+    ]
+    
+    for pattern in calendar_patterns:
+        if re.search(pattern, url, re.IGNORECASE):
+            if debug:
+                print(f"Detected crawler trap (calendar related): {url}")
+            return True
+    
+    return False
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)  #links is a list
@@ -185,9 +197,9 @@ def is_valid(url):
                 print(f"BAD LINK (discovered): {url}")
             return False
         
-        if passed_threshold(url):
+        if crawler_trap(url):
             if debug:
-                print(f"BAD LINK (threshold): {url}")
+                print(f"BAD LINK (trap): {url}")
             return False
 
         # if not robot_checker.check(url):
@@ -212,6 +224,7 @@ def is_valid(url):
 def extraction(url, resp):
     #time.sleep(0.5)  # Politeness delay of 0.5 seconds
     content = resp.raw_response.content #would like to see what this looks like maybe?
+    print content
     try:
         soup = BeautifulSoup(content, 'html5lib')
     except Exception:
@@ -221,10 +234,10 @@ def extraction(url, resp):
             print("soup error")
     #if there is a soup error, it terminates?
     
-    if url not in parsed_urls:
-        parsed_urls[url] = 1
-    else:
-        parsed_urls[url] += 1
+    # if url not in parsed_urls:
+    #     parsed_urls[url] = 1
+    # else:
+    #     parsed_urls[url] += 1
 
     return soup
 
