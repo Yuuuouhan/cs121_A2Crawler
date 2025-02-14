@@ -225,6 +225,8 @@ launch.py - where the program starts
 scraper.py - main functions
 answers.py - computes answers for final_answers.txt
 tokenizer.py - tokenizers from A1
+robots.py - gets robots.txt
+duplication.py - checksum and simhash functions
 
 final_answers.txt - stores final answers
 stop_words.txt - contains stop words
