@@ -11,14 +11,17 @@ def tokenize(text: str) -> None:
     @param text: a string that needs to be tokenized.
     @return: None
     """
-    pattern = r'\W+'
-    lowercase_text = text.lower()
-    words = re.findall(pattern, lowercase_text)
-    for word in words:
-        if word in tokens_dict:
-            tokens_dict[word] += 1
-        else:
-            tokens_dict[word] == 1
+    try:
+        pattern = r'[^a-zA-Z0-9_]'
+        lowercase_text = text.lower()
+        words = re.sub(pattern, " ", lowercase_text).split(" ")
+        for word in words:
+            if word in tokens_dict and word != ' ' and word != '':
+                tokens_dict[word] += 1
+            elif word != ' ' and word != '':
+                tokens_dict[word] = 1
+    except KeyError:
+        pass
 
 def compute_word_frequencies() -> dict:
     """
@@ -26,9 +29,4 @@ def compute_word_frequencies() -> dict:
 
     @return: dictionary of the 50 most common words and their frequencies, in order.
     """
-    return dict(sorted(tokens_dict.items(), key=lambda x: x[1]))
-
-if __name__ == "__main__":
-    sample_string = "is This this is a sample tesTing string. It contains some test words. It's a test. ಹಲೋ, ಹೇಗಿದ್ದೀಯನ್ನು ಕಾರ್ಯಕ"
-    tokenize(sample_string)
-    print(compute_word_frequencies())
+    return dict(sorted(tokens_dict.items(), key=lambda x: (-x[1], x[0])))
