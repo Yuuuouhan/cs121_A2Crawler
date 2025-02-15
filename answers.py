@@ -10,7 +10,7 @@ max_words = ""
 def answers():
 	num_unique_URLS = unique_URLS()
 	longest_page = return_longest_page()
-	common_words = tokenizer.computeWordFrequencies()
+	common_words = tokenizer.compute_word_frequencies()
 	subdomains = find_subdomains()
 	
 	with open("final_answers.txt", "w") as file:
