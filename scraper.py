@@ -146,15 +146,15 @@ def extract_next_links(url, resp):
     
     #extraction of links from 'url'
     extracted_links = []
-    extracted_links, num_words = extract_links(soup, url)
-
-    if num_words > max_words:
-        max_words = num_words
-        max_URL = url   
+    extracted_links = extract_links(soup, url)  
     
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
-    content = extract_text_content(soup)
+    content, num_words= extract_text_content(soup)
+
+    if num_words > max_words:
+        max_words = num_words
+        max_URL = url 
 
     # duplication checking: check sum
     checksum_val = duplication.checksum(content)
