@@ -45,17 +45,27 @@ def crawler_trap(url):
     @return: Returns True if the URL is a crawler trap, otherwise False.
     """
 
-    #only check query
-
     calendar_patterns = [
-        r'calendar', r'ical', r'icalendar', r'event', r'date', r'month', r'year', r'day'
+        r'calendar', r'icalendar', r'event', r'month', r'year', r'day'
     ]
+    query_patterns = [
+        r'ical', r'date'
+    ]
+    
+    parsed_url = urlparse(url)
     
     for pattern in calendar_patterns:
         if re.search(pattern, url, re.IGNORECASE):
             if debug:
                 print(f"Detected crawler trap (calendar related): {url}")
             return True
+    
+    if parsed_url.query:
+        for pattern in query_patterns:
+            if re.search(pattern, parsed_url.query, re.IGNORECASE):
+                if debug:
+                    print(f"Detected crawler trap (query related): {url}")
+                return True
     
     return False
 
