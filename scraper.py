@@ -3,8 +3,8 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize, compute_word_frequencies
 import duplication
-from answers import pages, max_URL, max_words
-# import robots as r
+from answers import pages
+import answers as a
 
 
 # DEBUG ON!
@@ -152,9 +152,8 @@ def extract_next_links(url, resp):
     #note - UNIQUE URL CHECKING ISSUE
     content, num_words= extract_text_content(soup)
 
-    if num_words > max_words:
-        max_words = num_words
-        max_URL = url 
+    if num_words > a.max_words:
+        a.update_max_URL(url, num_words)
 
     # duplication checking: check sum
     checksum_val = duplication.checksum(content)
@@ -302,7 +301,6 @@ def extract_text_content(soup):
         print(f"Tokens: {tokens}")
 
     return tokens, length_of_text
-
 
 def same_url(url1:str, url2:str):
     """

@@ -15,7 +15,7 @@ def answers():
 	
 	with open("final_answers.txt", "w") as file:
 		file.write(f"UNIQUE_URLS: {num_unique_URLS}\n")
-		file.write(f"LONGEST_PAGE: {longest_page}\n")
+		file.write(f"LONGEST_PAGE: {longest_page[0]}: {longest_page[1]}\n")
 		file.write(f"COMMON WORDS: {common_words}\n")
 		file.write(f"SUBDOMAINS: {subdomains}\n")
 
@@ -54,21 +54,18 @@ def unique_URLS() -> int:
 	"""
 	return len(pages)
 
-def update_max_URL(url: str, response: str) -> None:
+def update_max_URL(url: str, length: int) -> None:
 	"""
 	Updates max_URL and max_words to find the longest page in terms of the number
 	of words.
 	
-	@param response: takes the writeup from an incoming URL.
+	@param url: incoming URL
+	@param length: length of incoming URL
 	@return: None
 	"""
-	string = re.compile(r'<\/?[a-z][\s\S]*?>', re.IGNORECASE)
-	is_HTML = bool(string.match(response))
-	if not is_HTML:
-		new_length = len(response)
-		if max_words < new_length:
-			max_URL = url
-			max_words = new_length
+	max_URL = url
+	max_words = length
+	
 
 def return_longest_page() -> int:
 	"""
@@ -76,7 +73,7 @@ def return_longest_page() -> int:
 	
 	@return: integer representing the longest page in terms of the number of words.
 	"""
-	return max_words
+	return max_URL, max_words
 
 def find_subdomains() -> dict:
 	"""
