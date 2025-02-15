@@ -5,7 +5,7 @@ import tokenizer
 pages = set()
 subdomains = dict()
 max_URL = ""
-max_words = ""
+max_words = 0
 
 def answers():
 	num_unique_URLS = unique_URLS()

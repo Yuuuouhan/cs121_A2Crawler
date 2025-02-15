@@ -3,7 +3,7 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize, compute_word_frequencies
 import duplication
-from answers import pages 
+from answers import pages, max_URL, max_words
 # import robots as r
 
 
@@ -11,9 +11,6 @@ from answers import pages
 debug = False
 
 # robot_checker = r.Robot_Reader()
-
-# use if we want a dictionary approach
-#parsed_urls = set()
 
 #key - url, value - content scraped from page
 scraped_content = {} 
@@ -146,9 +143,14 @@ def extract_next_links(url, resp):
         print(f"Content over 200,000 bytes (200KB): {content_size}")
         return list()
 
+    
     #extraction of links from 'url'
     extracted_links = []
-    extracted_links = extract_links(soup, url)
+    extracted_links, num_words = extract_links(soup, url)
+
+    if num_words > max_words:
+        max_words = num_words
+        max_URL = url   
     
     #extraction of text content from 'url'
     #note - UNIQUE URL CHECKING ISSUE
@@ -285,17 +287,21 @@ def extract_text_content(soup):
     """
     Extract string from soup and transform into a list of tokens.
     @params: Soupified content of webpage
-    @return: list of tokens
+    @return: list of tokens and the length of text
     """
     tokens = []
+    length_of_text = 0
     for element in soup.find_all(string=True):
         if element.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]']:
             text = element.strip()
             if text:
+                word_count = len(text.split())
+                length_of_text += word_count
                 tokens.extend(tokenize(text))
     if debug:
         print(f"Tokens: {tokens}")
-    return tokens                        
+
+    return tokens, length_of_text
 
 
 def same_url(url1:str, url2:str):
