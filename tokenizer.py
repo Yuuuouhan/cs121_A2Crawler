@@ -2,9 +2,47 @@ import re
 from itertools import islice
 import contractions
 
-# account for single-letter tokens
-
 tokens_dict = {}
+
+
+def current_tokens(text:str) -> list:
+    """
+    Tokenizes the current set of tokens going through the current website being processed.
+
+    @param text: a string that needs to be tokenized.
+    @return: list of tokens.
+    """
+    pass
+
+def current_word_frequencies(tokens_list: list) -> dict:
+    """
+    Takes the current tokens being processed and returns a frequency dictionary of them.
+
+    @param: tokens that are in the current website.
+    @return: their frequencies
+    """
+    pass
+
+def update_tokens_dict(tokens_list: list) -> None:
+    """
+    Takes the current tokens returned from current_tokens and adds the tokens to the global
+    token frequency dictionary.
+
+    @param: tokens that are in the current website.
+    @return: None
+    """
+    pass
+
+def compute_word_frequencies() -> dict:
+    """
+    Copy + paste compute_word_frequencies().
+
+    @return: dictionary of the 50 most common words and their frequencies, in order.
+    """
+    pass
+
+####################################################################################################
+####################################################################################################
 
 def tokenize(text: str) -> list:
     """
@@ -23,10 +61,8 @@ def tokenize(text: str) -> list:
         for word in filtered_list:
             if word in tokens_dict and word != ' ' and word != '':
                 tokens_dict[word] += 1
-                print(word)
             elif word != ' ' and word != '':
                 tokens_dict[word] = 1
-                print(word)
         return words
     except KeyError:
         pass
