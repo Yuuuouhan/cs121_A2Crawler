@@ -18,7 +18,7 @@ def current_tokens(text:str) -> list:
         words = re.sub(pattern, " ", lowercase_text).split(" ")
         with open("stop_words.txt", 'r', encoding='utf-8') as file:
             forbidden_words = set(file.read().split())
-            filtered_list = [word for word in words if word not in forbidden_words]
+            filtered_list = [word for word in words if (word not in forbidden_words) and word and not word.isspace()]
         return filtered_list
     except KeyError:
         pass
