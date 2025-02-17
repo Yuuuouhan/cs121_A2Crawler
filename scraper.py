@@ -1,16 +1,15 @@
 import re
 from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
-from tokenizer import tokenize, compute_word_frequencies
+import tokenizer
 import duplication
 from answers import pages
 import answers as a
 
 
-# DEBUG ON!
+# DEBUG - printing
 debug = False
-
-# robot_checker = r.Robot_Reader()
+debug_v = False # even more prints, v for verbose
 
 #key - url, value - content scraped from page
 scraped_content = {} 
@@ -19,6 +18,7 @@ scraped_content = {}
 checksums = set()
 # near duplication checking: simhash
 simhashes = set()
+
 
 def already_parsed(url):
     """
@@ -34,6 +34,7 @@ def already_parsed(url):
         #contents = file.read()
         #return url in contents
 
+
 def crawler_trap(url):
     """
     Detects if a URL is a crawler trap.
@@ -43,7 +44,7 @@ def crawler_trap(url):
     """
 
     calendar_patterns = [
-        r'calendar', r'icalendar', r'event', r'month', r'year', r'day'
+        r'calendar', r'icalendar', r'event', r'month', r'year', r'day', r'pdf'
     ]
     query_patterns = [
         r'ical', r'date'
@@ -66,10 +67,11 @@ def crawler_trap(url):
     
     return False
 
+
 def scraper(url, resp):
-    links = extract_next_links(url, resp)  #links is a list
+    links = extract_next_links(url, resp)  # links is a list
     valid_links = [link for link in links if is_valid(link)]
-    if debug:
+    if debug_v:
         print(f"Adding to frontier: {valid_links}")
     return valid_links
      
@@ -114,15 +116,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-    # Thought process?:
-    # need try/except statements for status codes (resp.status)
-    # add resp.url to parse_urls if not already there, else, update the num of times we've parsed this
-    # if a page is a duplicate/near duplicate, update the num of times we've parsed the similar url
-    # scrape the urls in that page, return list
-    # except if status code is 300: do not go to redirected page?
-    # except if status code is 400: continue
-
-    # status code checking
+    # STATUS CODE CHECKING
     # 4xx client side error -> no links scrapped
     if (resp.status // 100 == 4) or (resp.status // 100 == 6):
         return list()
@@ -131,12 +125,7 @@ def extract_next_links(url, resp):
         return get_redirect(url, resp)
 
     
-    #beautiful soup takes over from here and returns html content
-    soup = extraction(url, resp)
-
-    #this part can lowk go in the beautifulsoup.py file so the 'soup'is not being transferred between files
-    #then maybe just return extracted_links, scraped_content directly when calling extraction() function
-
+    # UPPER BOUND CHECKING
     # Do not scrape web content over 200KB
     content_size = len(resp.raw_response.content)
     if content_size > 200000:
@@ -144,6 +133,13 @@ def extract_next_links(url, resp):
         return list()
 
     
+    # GET CONTENT (TOKENS)
+    # beautiful soup takes over from here and returns html content
+    soup = extraction(url, resp)
+    # not soupable
+    if not soup:
+        return list()
+
     #extraction of links from 'url'
     extracted_links = []
     extracted_links = extract_links(soup, url)  
@@ -152,22 +148,22 @@ def extract_next_links(url, resp):
     #note - UNIQUE URL CHECKING ISSUE
     content, num_words= extract_text_content(soup)
 
-    if num_words > a.max_words:
-        a.update_max_URL(url, num_words)
-
-    # duplication checking: check sum
+    
+    # DUPLICATION CHECKING
+    # checksum
     checksum_val = duplication.checksum(content)
     # exact duplicate found
     if checksum_val in checksums:
         return list()
     else:
         checksums.add(checksum_val)
-    simhash_val = duplication.simhash(compute_word_frequencies(content))
+    # simhash
+    simhash_val = duplication.simhash(tokenizer.current_word_frequencies(content))
     # check if any previous simhash and current simhash are too similar
     near_dup = False
     for sim in simhashes:
-        # threshold for near duplication is 0.75
-        if duplication.similarity_score(sim, simhash_val) >= 0.75:
+        # threshold for near duplication is 0.85
+        if duplication.similarity_score(sim, simhash_val) >= 0.85:
             near_dup = True
             break
     if near_dup:
@@ -175,14 +171,20 @@ def extract_next_links(url, resp):
     else:
         simhashes.add(simhash_val)
 
+    
+    # LOWER BOUND CHECKING
     # save content of webpage only if over 300 words (1 page) 
     if len(content) > 300:
         scraped_content[url] = content
     else:
         print(f"Low info web ({len(content)} tokens): {url}")
 
-    #not sure how to go about tokenizing after this step
-    #can also do tokeizing in extract_text_content function
+    
+    # UPDATE ANSWERS
+    if num_words > a.max_words:
+        a.update_max_URL(url, num_words)
+    tokenizer.update_tokens_dict(content)
+    
     return extracted_links
 
 
@@ -196,7 +198,8 @@ def is_valid(url):
             return False
         
         # original: r'.*\.(ics|cs|informatics|stat)\.uci\.edu$'
-        valid_hostname_pattern = r'.*(ics|cs|informatics|stat)\.uci\.edu$' #this one seems to work. needs to be tested with class server
+        valid_hostname_pattern = r'.*(ics|cs|informatics|stat)\.uci\.edu$' 
+        #this one seems to work. needs to be tested with class server
 
         if not re.match(valid_hostname_pattern, parsed.hostname.strip()):
             if debug:
@@ -234,8 +237,9 @@ def is_valid(url):
 
 def extraction(url, resp):
     #time.sleep(0.5)  # Politeness delay of 0.5 seconds
-    content = resp.raw_response.content #would like to see what this looks like maybe?
-    print(content)
+    content = resp.raw_response.content # would like to see what this looks like maybe?
+    if debug_v:
+        print(content)
     try:
         soup = BeautifulSoup(content, 'html5lib')
     except Exception:
@@ -243,6 +247,7 @@ def extraction(url, resp):
             soup = BeautifulSoup(content, 'lxml-xml')
         except Exception:
             print("soup error")
+            return None
     #if there is a soup error, it terminates?
     
     # if url not in parsed_urls:
@@ -267,8 +272,9 @@ def extract_links(soup, base_url):
     if canonical_link and same_url(canonical_link, base_url):
         if debug:
             print(f"Returning canonical link only: {canonical_link}")
-        return [canonical_link] #add if statement if canonical is equal to the link
+        return [canonical_link]
 
+    # not canonical -> get all other links
     for link in soup.find_all('a', href=True):
         href = link.get('href')
         if href:
@@ -296,8 +302,8 @@ def extract_text_content(soup):
             if text:
                 word_count = len(text.split())
                 length_of_text += word_count
-                tokens.extend(tokenize(text))
-    if debug:
+                tokens.extend(tokenizer.current_tokens(text))
+    if debug_v:
         print(f"Tokens: {tokens}")
 
     return tokens, length_of_text
