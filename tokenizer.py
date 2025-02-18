@@ -1,9 +1,8 @@
 import re
 from itertools import islice
-import contractions
+# import contractions
 
 tokens_dict = {}
-
 
 def current_tokens(text:str) -> list:
     """
@@ -14,12 +13,13 @@ def current_tokens(text:str) -> list:
     """
     try:
         pattern = r'[^a-zA-Z0-9_]'
-        lowercase_text = contractions.fix(text.lower())
-        words = re.sub(pattern, " ", lowercase_text).split(" ")
-        with open("stop_words.txt", 'r', encoding='utf-8') as file:
+        lowercase_text = text.lower().split()
+        with open("stop_words.txt", "r", encoding = 'utf-8') as file:
             forbidden_words = set(file.read().split())
-            filtered_list = [word for word in words if (word not in forbidden_words) and word and not word.isspace()]
-        return filtered_list
+            filtered_list = [word for word in lowercase_text if (word not in forbidden_words) and word and not word.isspace()]
+        words = " ".join(filtered_list)
+        filtered_list = re.sub(pattern, " ", words).split(" ")
+        return [word for word in filtered_list if word and not word.isspace()]
     except KeyError:
         pass
 
@@ -58,5 +58,5 @@ def compute_word_frequencies() -> dict:
 
     @return: dictionary of the 50 most common words and their frequencies, in order.
     """
-    sorted_dict = dict(sorted(tokens_dict.items(), key=lambda x: (-x[1], x[0])))
-    return dict(islice(sorted_dict.items(), 50))
+    new_dict = dict(islice(tokens_dict.items(), 50))
+    return dict(sorted(new_dict.items(), key=lambda x: (-x[1], x[0])))
