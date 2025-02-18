@@ -5,7 +5,7 @@ from utils.download import download
 from utils import get_logger
 import scraper
 import time
-import robots as r
+import crawler.robots as r
 from urllib.parse import urlparse, urljoin
 
 
