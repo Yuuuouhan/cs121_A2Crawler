@@ -21,18 +21,14 @@ class Worker(Thread):
         super().__init__(daemon=True)
     
     def can_parse(self, tbd_url: str) -> bool:
-        # shorten things up...don't keep urlparsing the url
         if self.disallowed_pages and any(site in tbd_url for site in self.disallowed_pages):
             return False
-        new_url = urlparse(tbd_url)
-        base_url = f"{new_url.scheme}://{new_url.hostname}"
-        new_url = urljoin(base_url, "/robots.txt")
-        robot = r.Robot_Reader(new_url, self.config)
+        robot = r.Robot_Reader(tbd_url, self.config)
         resp_url = robot.read()
         content = resp_url.raw_response.content.decode('utf-8')
         if (resp_url.status // 100 == 4) or not content or content.strip() == "":
             return True
-        pages = robot.add_disallowed_pages(new_url, content) or []
+        pages = robot.add_disallowed_pages(robot.base_url, content) or []
         self.disallowed_pages.extend(pages)
         if self.disallowed_pages and any(site in tbd_url for site in self.disallowed_pages):
             return False
