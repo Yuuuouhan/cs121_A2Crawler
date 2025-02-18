@@ -3,7 +3,6 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from bs4 import BeautifulSoup
 import tokenizer
 import duplication
-from answers import pages
 import answers as a
 
 
@@ -12,7 +11,7 @@ debug = False
 debug_v = False # even more prints, v for verbose
 
 #key - url, value - content scraped from page
-scraped_content = {} 
+# scraped_content = {} 
 
 # exact duplication checking: checksum
 checksums = set()
@@ -27,7 +26,7 @@ def already_parsed(url):
     @param url: url that is about to be parsed.
     @return: Returns True if url is in the dictionary
     """
-    return url in pages
+    return urldefrag(url)[0] in a.pages
     
     ### use this code if we want a .txt approach ###
     # with open("parsed_urls.txt") as file:
@@ -175,9 +174,12 @@ def extract_next_links(url, resp):
     # LOWER BOUND CHECKING
     # save content of webpage only if over 300 words (1 page) 
     if len(content) > 300:
-        scraped_content[url] = content
+        # scraped_content[url] = content
+        a.add_page(url)
+        a.add_to_ics_domains(url)
     else:
         print(f"Low info web ({len(content)} tokens): {url}")
+        return list()
 
     
     # UPDATE ANSWERS
@@ -269,9 +271,9 @@ def extract_links(soup, base_url):
             canonical_link = urljoin(base_url, canonical_link)
         canonical_link, _ = urldefrag(canonical_link)
     
-    if canonical_link and same_url(canonical_link, base_url):
-        if debug:
-            print(f"Returning canonical link only: {canonical_link}")
+    if canonical_link and not same_url(canonical_link, base_url):
+        #if debug:
+            #print(f"Returning canonical link only: {canonical_link}")
         return [canonical_link]
 
     # not canonical -> get all other links

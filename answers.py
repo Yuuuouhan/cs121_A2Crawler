@@ -26,7 +26,7 @@ def add_page(url: str) -> None:
 	@param url: incoming absolute URL path
 	@return: None
 	"""
-	url = urldefrag(url)
+	url = urldefrag(url)[0]
 	pages.add(url)
 
 def add_to_ics_domains(url: str) -> None:
@@ -37,14 +37,17 @@ def add_to_ics_domains(url: str) -> None:
 	@param url: incoming absolute URL path
 	@return: None
 	"""
-	domain = urlparse(url).netloc[-11:]
-	url = urldefrag(url)
-	if domain == "ics.uci.edu":
-		parsed_url = urlparse(url).hostname
-		if parsed_url not in subdomains:
-			subdomains[parsed_url] = set(url)
-		else:
-			subdomains[parsed_url].add(url)
+	try: 
+		domain = urlparse(url).netloc[-11:]
+		url = urldefrag(url)[0]
+		if domain == "ics.uci.edu":
+			parsed_url = urlparse(url).hostname
+			if parsed_url not in subdomains:
+				subdomains[parsed_url] = set(url)
+			else:
+				subdomains[parsed_url].add(url)
+	except:
+		pass
 
 def unique_URLS() -> int:
 	"""
@@ -63,6 +66,8 @@ def update_max_URL(url: str, length: int) -> None:
 	@param length: length of incoming URL
 	@return: None
 	"""
+	global max_URL
+	global max_words
 	max_URL = url
 	max_words = length
 	
@@ -86,4 +91,3 @@ def find_subdomains() -> dict:
 	for subdomain in subdomains:
 		return_dict[subdomain] = len(subdomains[subdomain])
 	return return_dict
-
