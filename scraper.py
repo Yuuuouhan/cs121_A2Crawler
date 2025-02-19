@@ -15,8 +15,8 @@ debug_v = False # even more prints, v for verbose
 
 # exact duplication checking: checksum
 checksums = set()
-# near duplication checking: simhash
-simhashes = set()
+# # near duplication checking: simhash
+# simhashes = set()
 
 
 def already_parsed(url):
@@ -125,10 +125,10 @@ def extract_next_links(url, resp):
 
     
     # UPPER BOUND CHECKING
-    # Do not scrape web content over 200KB
+    # Do not scrape web content over 250KB
     content_size = len(resp.raw_response.content)
-    if content_size > 200000:
-        print(f"Content over 200,000 bytes (200KB): {content_size}")
+    if content_size > 250000:
+        print(f"Content over 250,000 bytes (250KB): {content_size}")
         return list()
 
     
@@ -156,24 +156,24 @@ def extract_next_links(url, resp):
         return list()
     else:
         checksums.add(checksum_val)
-    # simhash
-    simhash_val = duplication.simhash(tokenizer.current_word_frequencies(content))
-    # check if any previous simhash and current simhash are too similar
-    near_dup = False
-    for sim in simhashes:
-        # threshold for near duplication is 0.85
-        if duplication.similarity_score(sim, simhash_val) >= 0.85:
-            near_dup = True
-            break
-    if near_dup:
-        return list()
-    else:
-        simhashes.add(simhash_val)
+    # # simhash
+    # simhash_val = duplication.simhash(tokenizer.current_word_frequencies(content))
+    # # check if any previous simhash and current simhash are too similar
+    # near_dup = False
+    # for sim in simhashes:
+    #     # threshold for near duplication is 0.85
+    #     if duplication.similarity_score(sim, simhash_val) >= 0.85:
+    #         near_dup = True
+    #         break
+    # if near_dup:
+    #     return list()
+    # else:
+    #     simhashes.add(simhash_val)
 
     
     # LOWER BOUND CHECKING
-    # save content of webpage only if over 300 words (1 page) 
-    if len(content) > 300:
+    # save content of webpage only if over 50
+    if len(content) > 50:
         # scraped_content[url] = content
         a.add_page(url)
         a.add_to_ics_domains(url)

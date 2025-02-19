@@ -22,7 +22,7 @@ def simhash(tok_weights:dict):
     """
     hash_values = [0] * 64
     for token in tok_weights.keys():
-        hash_val = bin(int.from_bytes(hashlib.md5(token.encode('utf-8')).digest()))[2:66] # bit string
+        hash_val = bin(int.from_bytes(hashlib.md5(token.encode('utf-8')).digest(), byteorder='big'))[2:66] # bit string
         for i in range(64):
             if hash_val[i] == '0':
                 hash_values[i] -= tok_weights[token]

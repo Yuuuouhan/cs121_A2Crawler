@@ -40,12 +40,12 @@ class Worker(Thread):
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 break
-            try:
-                if not self.can_parse(tbd_url):
-                    continue
-            except Exception as e:
-                print(f"EXCEPTION WITH ROBOT: {e}")
-                pass
+            # try:
+            #     if not self.can_parse(tbd_url):
+            #         continue
+            # except Exception as e:
+            #     print(f"EXCEPTION WITH ROBOT: {e}")
+            #     pass
             
             resp = download(tbd_url, self.config, self.logger)
             self.logger.info(
