@@ -58,5 +58,5 @@ def compute_word_frequencies() -> dict:
 
     @return: dictionary of the 50 most common words and their frequencies, in order.
     """
-    new_dict = dict(islice(tokens_dict.items(), 50))
+    new_dict = dict(islice(tokens_dict.items(), 75))
     return dict(sorted(new_dict.items(), key=lambda x: (-x[1], x[0])))
